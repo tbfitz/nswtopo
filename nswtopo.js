@@ -3,6 +3,8 @@ function initMap() {
     var about = document.getElementById('about');
     var title = document.getElementById('title');
     var toggles = document.getElementById('toggles');
+    var qrcode = document.getElementById('qrcode');
+    var touch = 'ontouchstart' in document.documentElement;
     var map = new google.maps.Map(document.getElementById('map'), {
         mapTypeId: google.maps.MapTypeId.TERRAIN,
         streetViewControl: false,
@@ -81,10 +83,20 @@ function initMap() {
         var span = document.createElement('span');
         span.textContent = event.feature.getProperty('title');;
         title.appendChild(span);
+        if (touch) return;
+        new QRCode(qrcode, {
+            text: event.feature.getProperty('url'),
+            width: 128,
+            height: 128,
+        });
+        qrcode.classList.toggle('hidden');
     });
     map.data.addListener('mouseout', function(event) {
         map.data.overrideStyle(event.feature, { strokeWeight: 1});
         title.innerHTML = null;
+        if (touch) return;
+        qrcode.innerHTML = null;
+        qrcode.classList.toggle('hidden');
     });
     function hideAbout() {
         showAbout.classList.remove('selected');

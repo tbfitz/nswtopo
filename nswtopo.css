@@ -23,6 +23,13 @@ html, body {
   opacity: 0.75;
   padding: 0.5em 1em;
 }
+#qrcode {
+  position: absolute;
+  bottom: 40px;
+  left: 8px;
+  width: 128px;
+  height: 128px;
+}
 #select {
   font-family: Roboto, Arial, sans-serif;
   margin: 10px;
