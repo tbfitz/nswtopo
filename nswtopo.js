@@ -70,7 +70,7 @@ function initMap() {
             strokeWeight: 1,
         };
     });
-    map.controls[google.maps.ControlPosition.TOP_RIGHT].push(document.getElementById('select'));
+    map.controls[google.maps.ControlPosition.RIGHT_CENTER].push(document.getElementById('toggles'));
     showAbout.addEventListener('click', function() {
         showAbout.classList.toggle('selected');
         about.classList.toggle('hidden');

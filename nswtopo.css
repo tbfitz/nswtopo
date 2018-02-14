@@ -30,42 +30,50 @@ html, body {
   width: 128px;
   height: 128px;
 }
-#select {
+#toggles div {
   font-family: Roboto, Arial, sans-serif;
-  margin: 10px;
   cursor: pointer;
-  text-align: center;
   -webkit-user-select: none;
   -moz-user-select: none;
-}
-#toggles {
-  background-color: white;
-  border-radius: 2px;
-  box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 4px -1px;
-  position: relative;
-}
-#toggles div {
+  background-color: rgba(0,0,0,0.3);
   padding: 8px;
-  display: inline-block;
-  text-align: left;
-  border-right-width: 1px;
-  border-right-style: solid;
-  border-right-color: #EBEBEB;
-  color: #565656;
+  text-align: right;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: rgba(0,0,0,0.2);
+  color: rgba(255,255,255,0.65);
 }
-#toggles div:hover {
-  background: #ebebeb;
+#toggles div:first-child {
+  border-radius: 5px 0 0 0;
+}
+#toggles div:last-child {
+  border-bottom: none;
+  border-radius: 0 0 0 5px;
 }
 #toggles div.selected {
   font-weight: 500;
-  box-shadow: inset rgba(0, 0, 0, 0.5) 2px 2px 3px -2px;
-  color: black;
+  color: rgba(255,255,255,1);
 }
-#toggles #show-25k.selected {
+#toggles div::after {
+  content: '\2713';
+  padding-left: 5px;
+  color: white;
+  visibility: hidden;
+}
+#toggles div.selected::after {
+  visibility: visible;
+}
+#toggles #show-25k.selected::after {
   color: #FF0000;
 }
-#toggles #show-50k.selected {
+#toggles #show-50k.selected::after {
   color: #0000FF;
+}
+#toggles #show-about.selected::after {
+  visibility: hidden;
+}
+#toggles div:hover {
+  background-color: rgba(0,0,0,0.5);
 }
 #about {
   position: absolute;
