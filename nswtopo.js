@@ -11,17 +11,17 @@ function initMap() {
     });
     map.data.loadGeoJson('maps.json', {}, function(features) {
         var states = [];
-        var scales = [];
+        var types = [];
         var bounds = new google.maps.LatLngBounds();
         features.forEach(function(feature) {
             feature.getGeometry().getAt(0).getArray().forEach(function(point) {
                 bounds.extend(point);
             })
-            feature.setProperty('scale', feature.getProperty('scale') / 1000 + 'k');
+            if (types.indexOf(feature.getProperty('type')) < 0)
+                types.push(feature.getProperty('type'));
+            if (feature.getProperty('type') === 'bundle') return;
             if (states.indexOf(feature.getProperty('state')) < 0)
                 states.push(feature.getProperty('state'));
-            if (scales.indexOf(feature.getProperty('scale')) < 0)
-                scales.push(feature.getProperty('scale'));
         });
         map.fitBounds(bounds);
         states.forEach(function(state) {
@@ -31,28 +31,31 @@ function initMap() {
             element.classList.add('selected');
             toggles.appendChild(element);
             element.addEventListener('click', function() {
-                var selected = element.classList.toggle('selected')
+                element.classList.toggle('selected');
                 features.filter(function(feature) {
-                    return feature.getProperty('state') === state;
-                }).filter(function(feature) {
-                    return !selected || document.getElementById('show-' + feature.getProperty('scale')).classList.contains('selected');
+                    return document.getElementById('show-' + feature.getProperty('type')).classList.contains('selected');
                 }).forEach(function(feature) {
+                    var selected = feature.getProperty('state').split(',').some(function(state) {
+                        return document.getElementById('show-' + state).classList.contains('selected');
+                    });
                     map.data.overrideStyle(feature, { visible: selected });
                 });
             });
         });
-        scales.forEach(function(scale) {
+        types.forEach(function(type) {
             var element = document.createElement('div');
-            element.textContent = scale;
-            element.id = 'show-' + scale;
+            element.textContent = type;
+            element.id = 'show-' + type;
             element.classList.add('selected');
             toggles.appendChild(element);
             element.addEventListener('click', function() {
-                var selected = element.classList.toggle('selected')
+                var selected = element.classList.toggle('selected');
                 features.filter(function(feature) {
-                    return feature.getProperty('scale') === scale;
+                    return feature.getProperty('state').split(',').some(function(state) {
+                        return document.getElementById('show-' + state).classList.contains('selected');
+                    });
                 }).filter(function(feature) {
-                    return !selected || document.getElementById('show-' + feature.getProperty('state')).classList.contains('selected');
+                    return feature.getProperty('type') === type;
                 }).forEach(function(feature) {
                     map.data.overrideStyle(feature, { visible: selected });
                 });
@@ -60,13 +63,13 @@ function initMap() {
         });
     });
     map.data.setStyle(function(feature) {
-        var scale = feature.getProperty('scale');
-        var colour = scale === '25k' ? '#FF0000' : scale === '50k' ? '#0000FF' : '#FF00FF';
+        var type = feature.getProperty('type');
+        var colour = type === '25k' ? '#FF0000' : type === '50k' ? '#0000FF' : '#000000';
         return {
             strokeColor: colour,
             fillColor: colour,
             strokeOpacity: 0.8,
-            fillOpacity: 0.15,
+            fillOpacity: type === 'bundle' ? 0.25 : 0.15,
             strokeWeight: 1,
         };
     });
@@ -81,7 +84,7 @@ function initMap() {
     map.data.addListener('mouseover', function(event) {
         map.data.overrideStyle(event.feature, { strokeWeight: 4});
         var span = document.createElement('span');
-        span.textContent = event.feature.getProperty('title');;
+        span.textContent = event.feature.getProperty('title');
         title.appendChild(span);
         if (touch) return;
         new QRCode(qrcode, {
@@ -101,8 +104,8 @@ function initMap() {
     function hideAbout() {
         showAbout.classList.remove('selected');
         about.classList.add('hidden');
-    };
+    }
     google.maps.event.addDomListener(map, 'mousedown', hideAbout);
     map.data.addListener('mousedown', hideAbout);
     document.getElementById('close').addEventListener('click', hideAbout);
-};
+}

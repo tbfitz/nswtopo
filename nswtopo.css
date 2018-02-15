@@ -69,6 +69,9 @@ html, body {
 #toggles #show-50k.selected::after {
   color: #0000FF;
 }
+#toggles #show-bundle.selected::after {
+  color: #000000;
+}
 #toggles #show-about.selected::after {
   visibility: hidden;
 }
