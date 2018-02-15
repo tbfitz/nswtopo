@@ -35,13 +35,13 @@ html, body {
   cursor: pointer;
   -webkit-user-select: none;
   -moz-user-select: none;
-  background-color: rgba(0,0,0,0.3);
+  background-color: rgba(255,255,255,0.6);
   padding: 8px;
   text-align: right;
   border-bottom-width: 1px;
   border-bottom-style: solid;
-  border-bottom-color: rgba(0,0,0,0.2);
-  color: rgba(255,255,255,0.65);
+  border-bottom-color: rgba(0,0,0,0.1);
+  color: rgba(0,0,0,0.65);
 }
 #toggles div:first-child {
   border-radius: 5px 0 0 0;
@@ -52,31 +52,31 @@ html, body {
 }
 #toggles div.selected {
   font-weight: 500;
-  color: rgba(255,255,255,1);
+  color: rgba(0,0,0,1);
 }
 #toggles div::after {
   content: '\2713';
   padding-left: 5px;
-  color: white;
+  color: black;
   visibility: hidden;
 }
 #toggles div.selected::after {
   visibility: visible;
 }
 #toggles #show-25k.selected::after {
-  color: #FF0000;
+  color: red;
 }
 #toggles #show-50k.selected::after {
-  color: #0000FF;
+  color: blue;
 }
 #toggles #show-bundle.selected::after {
-  color: #000000;
+  color: black;
 }
 #toggles #show-about.selected::after {
   visibility: hidden;
 }
 #toggles div:hover {
-  background-color: rgba(0,0,0,0.5);
+  background-color: rgba(255,255,255,0.9);
 }
 #about {
   position: absolute;
