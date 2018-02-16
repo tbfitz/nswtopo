@@ -71,6 +71,7 @@ function initMap() {
             strokeOpacity: 0.8,
             fillOpacity: type === 'bundle' ? 0.25 : 0.15,
             strokeWeight: 1,
+            zIndex: type === '50k' ? 1 : type === '25k' ? 2 : 0,
         };
     });
     map.controls[google.maps.ControlPosition.RIGHT_CENTER].push(document.getElementById('toggles'));
