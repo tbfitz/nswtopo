@@ -1,112 +1,84 @@
-function initMap() {
-    var showAbout = document.getElementById('show-about')
-    var about = document.getElementById('about');
-    var title = document.getElementById('title');
-    var toggles = document.getElementById('toggles');
-    var qrcode = document.getElementById('qrcode');
-    var touch = 'ontouchstart' in document.documentElement;
-    var map = new google.maps.Map(document.getElementById('map'), {
-        mapTypeId: google.maps.MapTypeId.TERRAIN,
-        streetViewControl: false,
-    });
-    map.data.loadGeoJson('maps.json', {}, function(features) {
-        var states = [];
-        var types = [];
-        var bounds = new google.maps.LatLngBounds();
-        features.forEach(function(feature) {
-            feature.getGeometry().getAt(0).getArray().forEach(function(point) {
-                bounds.extend(point);
-            })
-            if (types.indexOf(feature.getProperty('type')) < 0)
-                types.push(feature.getProperty('type'));
-            if (feature.getProperty('type') === 'bundle') return;
-            if (states.indexOf(feature.getProperty('state')) < 0)
-                states.push(feature.getProperty('state'));
-        });
-        map.fitBounds(bounds);
-        states.forEach(function(state) {
-            var element = document.createElement('div');
-            element.textContent = state;
-            element.id = 'show-' + state;
-            element.classList.add('selected');
-            toggles.appendChild(element);
-            element.addEventListener('click', function() {
-                element.classList.toggle('selected');
-                features.filter(function(feature) {
-                    return document.getElementById('show-' + feature.getProperty('type')).classList.contains('selected');
-                }).forEach(function(feature) {
-                    var selected = feature.getProperty('state').split(',').some(function(state) {
-                        return document.getElementById('show-' + state).classList.contains('selected');
-                    });
-                    map.data.overrideStyle(feature, { visible: selected });
-                });
-            });
-        });
-        types.forEach(function(type) {
-            var element = document.createElement('div');
-            element.textContent = type;
-            element.id = 'show-' + type;
-            element.classList.add('selected');
-            toggles.appendChild(element);
-            element.addEventListener('click', function() {
-                var selected = element.classList.toggle('selected');
-                features.filter(function(feature) {
-                    return feature.getProperty('state').split(',').some(function(state) {
-                        return document.getElementById('show-' + state).classList.contains('selected');
-                    });
-                }).filter(function(feature) {
-                    return feature.getProperty('type') === type;
-                }).forEach(function(feature) {
-                    map.data.overrideStyle(feature, { visible: selected });
-                });
-            });
-        });
-    });
-    map.data.setStyle(function(feature) {
-        var type = feature.getProperty('type');
-        var colour = type === '25k' ? '#FF0000' : type === '50k' ? '#0000FF' : '#000000';
-        return {
-            strokeColor: colour,
-            fillColor: colour,
-            strokeOpacity: 0.8,
-            fillOpacity: type === 'bundle' ? 0.25 : 0.15,
-            strokeWeight: 1,
-            zIndex: type === '50k' ? 1 : type === '25k' ? 2 : 0,
-        };
-    });
-    map.controls[google.maps.ControlPosition.RIGHT_CENTER].push(document.getElementById('toggles'));
-    showAbout.addEventListener('click', function() {
-        showAbout.classList.toggle('selected');
-        about.classList.toggle('hidden');
-    });
-    map.data.addListener('click', function(event) {
-        window.open(event.feature.getProperty('url'));
-    });
-    map.data.addListener('mouseover', function(event) {
-        map.data.overrideStyle(event.feature, { strokeWeight: 4});
-        var span = document.createElement('span');
-        span.textContent = event.feature.getProperty('title');
-        title.appendChild(span);
-        if (touch) return;
-        new QRCode(qrcode, {
-            text: event.feature.getProperty('url'),
-            width: 128,
-            height: 128,
-        });
-        qrcode.classList.toggle('hidden');
-    });
-    map.data.addListener('mouseout', function(event) {
-        map.data.overrideStyle(event.feature, { strokeWeight: 1});
-        title.innerHTML = null;
-        if (touch) return;
-        qrcode.innerHTML = null;
-        qrcode.classList.toggle('hidden');
-    });
-    function hideAbout() {
-        showAbout.classList.remove('selected');
-        about.classList.add('hidden');
-    }
-    google.maps.event.addDomListener(map, 'mousedown', hideAbout);
-    map.data.addListener('mousedown', hideAbout);
-    document.getElementById('close').addEventListener('click', hideAbout);
-}
+window.addEventListener('load', function() {
+	var xhr = new XMLHttpRequest();
+	xhr.addEventListener('load', function() {
+		if (this.status != 200) return;
+		var sheets = JSON.parse(this.responseText).features.map(function(feature) {
+			return {
+				type: feature['properties']['type'],
+				url: feature['properties']['url'],
+				state: feature['properties']['state'],
+				title: feature['properties']['title'],
+				corners: feature['geometry']['coordinates'][0].map(pair => pair.reverse()),
+			};
+		});
+		var states = [], types = ['bundle', '50k', '25k'];
+		var bounds = L.latLngBounds(sheets[0].corners);
+		sheets.forEach(sheet => {
+			sheet.corners.forEach(point => bounds.extend(point));
+			if (states.indexOf(sheet.state) < 0)
+				states.push(sheet.state);
+		});
+		var map = L.mapbox.map('map', 'mapbox.outdoors', {
+			accessToken: 'pk.eyJ1IjoibWhvbGxpbmciLCJhIjoiY2pncms3d3plMDY3ODJ2bnh0YWdydTBwYyJ9.RdmqeL6b_5m8Q-SzQdbXuQ',
+			minZoom: 5,
+			maxZoom: 14,
+			maxBounds: bounds.pad(0.2),
+		}).fitBounds(bounds);
+		types.forEach(type => states.forEach(state => map.createPane(type + ',' + state)));
+		states = states.filter(state => !state.includes(','));
+		types.concat(states).forEach(type => {
+			var element = document.createElement('div');
+			element.textContent = type;
+			element.id = 'show-' + type;
+			element.classList.add('selected');
+			document.getElementById('toggles').appendChild(element);
+			element.addEventListener('click', function() {
+				element.classList.toggle('selected');
+				Object.keys(map.getPanes()).forEach(key => {
+					keys = key.split(',');
+					if (!keys.includes(type)) return;
+					var selected = keys.every(key => document.getElementById('show-' + key).classList.contains('selected'));
+					map.getPane(key).style.display = selected ? 'block' : 'none';
+				});
+			});
+		});
+		var toggles = L.control({position: 'topright'});
+		toggles.onAdd = map => document.getElementById('toggles');
+		toggles.addTo(map);
+		var qrcode = L.control({position: 'bottomleft'});
+		qrcode.onAdd = map => document.getElementById('qrcode');
+		qrcode.addTo(map);
+		function toggleAbout() {
+			document.getElementById('show-about').classList.toggle('selected');
+			document.getElementById('about').classList.toggle('hidden');
+		};
+		document.getElementById('show-about').addEventListener('click', toggleAbout);
+		document.getElementById('close').addEventListener('click', toggleAbout);
+		sheets.forEach(sheet => {
+			var weight = sheet.type === 'bundle' ? 2 : 1;
+			L.polygon(sheet.corners, {
+				color: sheet.type === '25k' ? '#FF0000' : sheet.type === '50k' ? '#0000FF' : '#000000',
+				weight: weight,
+				opacity: 0.8,
+				fillOpacity: 0.05,
+				pane: sheet.type + ',' + sheet.state,
+			}).on('click', function() {
+				window.open(sheet.url);
+			}).on('mouseover', function() {
+				this.setStyle({weight: 4});
+				if ('ontouchstart' in document.documentElement) return;
+				new QRCode(document.getElementById('qrcode'), {text: sheet.url, width: 128, height: 128});
+			}).on('mouseout', function() {
+				this.setStyle({weight: weight});
+				if ('ontouchstart' in document.documentElement) return;
+				document.getElementById('qrcode').innerHTML = null;
+			}).bindTooltip(sheet.title, {
+				direction: 'top',
+				opacity: 0.75,
+				sticky: true,
+			}).addTo(map);
+		});
+	});
+	xhr.open('GET', 'maps.json');
+	xhr.send();
+});

@@ -5,10 +5,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <link rel="stylesheet" type="text/css" href="nswtopo.css">
+    <link rel="stylesheet" type="text/css" href="https://api.mapbox.com/mapbox.js/v3.1.1/mapbox.css">
+    <script async src="nswtopo.js"></script>
+    <script async src="qrcode.js"></script>
+    <script async src="https://api.mapbox.com/mapbox.js/v3.1.1/mapbox.js"></script>
     <link rel="alternate" type="application/vnd.geo+json" href="maps.json">
-    <script src="nswtopo.js"></script>
-    <script src="qrcode.js"></script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBO8NzpcnKwSJK3XsMkKAz2-E3l03d9T7U&callback=initMap"></script>
     <script>
       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
       (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -20,8 +21,7 @@
   </head>
   <body>
     <div id="map"></div>
-    <div id="title"></div>
-    <div id="qrcode" class="hidden"></div>
+    <div id="qrcode"></div>
     <div id="toggles"><div id="show-about">About</div></div>
     <div id="about" class="hidden">
       <div class="box">
@@ -71,9 +71,8 @@
               Download the maps to your device and you're good to go.
             </p>
             <p>
-              Maps for NSW cover the eastern half of the state at scales of 1:25&nbsp;000 and 1:50&nbsp;000.
-              Victorian and Tasmanian maps cover each state at a scale of 1:25&nbsp;000.
-              The map sets correspond to the official LPI, VICMAP and TASMAP series.
+              Maps are available for NSW, VIC, TAS, WA and SA at scales of 1:25&nbsp;000 or 1:50&nbsp;000 according to area.
+              Each map set is created from official government topographic data for that state.
             </p>
           </section>
         </div>
