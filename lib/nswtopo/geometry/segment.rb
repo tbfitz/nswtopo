@@ -7,7 +7,7 @@ module Segment
     zip rotate
   end
 
-  def difference
+  def difference_seg
     last.minus first
   end
 
