@@ -1,6 +1,6 @@
 module VectorSequence
   def perps
-    ring.map(&:difference).map(&:perp)
+    ring.map(&:difference_seg).map(&:perp)
   end
 
   def signed_area
@@ -23,7 +23,7 @@ module VectorSequence
   end
 
   def convex?
-    ring.map(&:difference).ring.all? do |directions|
+    ring.map(&:difference_seg).ring.all? do |directions|
       directions.inject(&:cross) >= 0
     end
   end
@@ -101,7 +101,7 @@ module VectorSequence
   end
 
   def path_length
-    segments.map(&:difference).sum(&:norm)
+    segments.map(&:difference_seg).sum(&:norm)
   end
 
   def trim(margin)
